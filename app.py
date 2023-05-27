@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-openai.api_key = "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"
+openai.api_key = "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"
 
 messages = [{"role": "system", "content": "Kamu adalah seorang ahli yang mempunyai spesialisasi dalam bidang perbaikan printer"}]
 
