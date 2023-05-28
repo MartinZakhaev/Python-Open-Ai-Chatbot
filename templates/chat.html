@@ -85,6 +85,14 @@
 				});
 				event.preventDefault();
 			});
+
+			$(function () {
+				$("button#rec").on("click", function (e) {
+					e.preventDefault();
+					$.getJSON("/get-mic-input", function (data) { })
+				});
+				return false;
+			});
 		});
 	</script>
 </body>

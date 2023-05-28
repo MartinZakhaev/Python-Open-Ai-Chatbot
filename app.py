@@ -27,6 +27,11 @@ def chat():
         os.remove("res.mp3")
     return response, play_sound()
 
+@app.route("/get-mic-input")
+def mic_input():
+    print("Hello")
+    return ("nothing")
+
 def get_chat_response(user_input):
     messages.append({"role": "user", "content": user_input})
     response = openai.ChatCompletion.create(
