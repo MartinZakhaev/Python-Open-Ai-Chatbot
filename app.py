@@ -1,7 +1,8 @@
+import os
 import openai
 from gtts import gTTS
 from io import BytesIO
-from IPython.display import Audio
+from playsound import playsound
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
@@ -19,14 +20,12 @@ def chat():
     msg = request.form["msg"]
     input = msg
     response = get_chat_response(input)
-    # fp = BytesIO()
-    # tts_res = gTTS(text=response, lang="id")
-    # tts_res.write_to_fp(fp)
-    # fp.seek(0)
-    # return Audio(fp.read(), autoplay=True)
-    # fp.close()
-    return response
-    # return get_chat_response(input)
+    tts_res = gTTS(text=response, lang="id")
+    tts_res.save("res.mp3")
+    def play_sound():
+        playsound("res.mp3")
+        os.remove("res.mp3")
+    return response, play_sound()
 
 def get_chat_response(user_input):
     messages.append({"role": "user", "content": user_input})
