@@ -4,7 +4,7 @@ import re
 import nltk
 import openai
 import speech_recognition as sr
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize, word_tokenize
 from gtts import gTTS
 from io import BytesIO
 from playsound import playsound
@@ -33,8 +33,21 @@ def chat():
     def play_sound():
         playsound("res.mp3")
         os.remove("res.mp3")
+    def tokenize():
+        translation_table = str.maketrans("", "", string.digits)
+        translated_text = response.translate(translation_table)
+        clean_text = " ".join(translated_text.split())
+        sentence_token = sent_tokenize(clean_text)
+        for sentence in sentence_token:
+            if sentence == ".":
+                sentence_token.remove(sentence)
+        word_tokens = []
+        for sentence in range(len(sentence_token)):
+            token = word_tokenize(sentence_token[sentence])
+            word_tokens.append(token)
+        return jsonify(word_tokens)
     return response, play_sound()
-    # return response
+    # return response, tokenize()
 
 @app.route("/get-mic-input")
 def mic_input():
@@ -60,15 +73,8 @@ def get_chat_response(user_input):
     bot_reply = response["choices"][0]["message"]["content"]
     messages.append({"role": "assistant", "content": bot_reply})
     text = bot_reply
-    translation_table = str.maketrans("", "", string.digits)
-    translated_text = text.translate(translation_table)
-    clean_text = " ".join(translated_text.split())
-    sentence_token = sent_tokenize(clean_text)
-    for sentence in sentence_token:
-        if sentence == ".":
-            sentence_token.remove(sentence)
-    print(sentence_token)
     return bot_reply
 
 if __name__ == "__main__":
-    app.run()
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
