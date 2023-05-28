@@ -1,9 +1,12 @@
 import os
 import openai
+import speech_recognition as sr
 from gtts import gTTS
 from io import BytesIO
 from playsound import playsound
 from flask import Flask, render_template, request, jsonify
+
+sr.__version__
 
 app = Flask(__name__)
 
@@ -29,8 +32,20 @@ def chat():
 
 @app.route("/get-mic-input")
 def mic_input():
-    print("Hello")
-    return ("nothing")
+    r = sr.Recognizer()
+    sr.Microphone()
+    with sr.Microphone() as source:
+        print("Ucapkan sesuatu...")
+        audio = r.listen(source)
+    try:
+        text = r.recognize_google(audio, language="id-ID")
+        # print("Anda mengucapkan:", text)
+        return jsonify({"text": text})
+    except sr.UnknownValueError:
+        print('Audio unintelligible')
+    except sr.RequestError as e:
+        print("Cannot obtain result: {0}".format(e))
+    
 
 def get_chat_response(user_input):
     messages.append({"role": "user", "content": user_input})
