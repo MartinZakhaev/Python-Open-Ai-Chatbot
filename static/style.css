@@ -18,7 +18,7 @@ body,html{
 }
 .tokenizing_card{
 	margin-top: 35px;
-	height: 20%;
+	height: 50%;
 	border-radius: 15px !important;
 	background-color: rgba(0,0,0,0.4) !important;
 }

@@ -64,7 +64,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="messageFormeight" class="card-body msg_card_body">
+					<div id="tokenFormeight" class="card-body msg_card_body">
 
 
 					</div>
@@ -80,7 +80,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="messageFormeight" class="card-body msg_card_body">
+					<div id="stemFormeight" class="card-body msg_card_body">
 
 
 					</div>
@@ -96,7 +96,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="messageFormeight" class="card-body msg_card_body">
+					<div id="stopwordFormeight" class="card-body msg_card_body">
 
 
 					</div>
@@ -112,7 +112,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="messageFormeight" class="card-body msg_card_body">
+					<div id="postagFormeight" class="card-body msg_card_body">
 
 
 					</div>
@@ -160,7 +160,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="messageFormeight" class="card-body msg_card_body">
+					<div id="logicalFormeight" class="card-body msg_card_body">
 
 
 					</div>
@@ -176,7 +176,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="messageFormeight" class="card-body msg_card_body">
+					<div id="themeroleFormeight" class="card-body msg_card_body">
 
 
 					</div>
@@ -192,6 +192,14 @@
 				const minute = date.getMinutes();
 				const time = hour + ":" + minute;
 				var user_input = $("#text").val();
+				var bot_reply;
+				var tokenize_res;
+				var stemmed_res;
+				var removed_stopword;
+				var pos_tag;
+				var top_down;
+				var theme_role;
+				var logical_form;
 
 				$("#text").val("");
 
@@ -200,14 +208,140 @@
 
 				$("#messageFormeight").append(userHtml);
 
-				$.ajax({
-					data: {
-						msg: user_input,
-					},
-					type: "POST",
-					url: "/get",
-				}).done(function (data) {
-					var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + time + '</span></div></div>';
+				// $.ajax({
+				// 	data: {
+				// 		msg: user_input,
+				// 	},
+				// 	type: "POST",
+				// 	url: "/get",
+				// }).done(function (data) {
+				// 	var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + time + '</span></div></div>';
+				// 	$("#messageFormeight").append($.parseHTML(botHtml));
+				// });
+
+				$.when(
+					$.ajax({
+						data: {
+							msg: user_input,
+						},
+						type: "POST",
+						url: "/get",
+						success: function (data) {
+							bot_reply = data;
+							$.ajax({
+								data: {
+									text: user_input,
+								},
+								type: "POST",
+								url: "/tokenize",
+								crossDomain: true,
+								success: function (data) {
+									tokenize_res = data;
+									$("#tokenFormeight").empty();
+									for (let index = 0; index < tokenize_res.length; index++) {
+										var tokenHTML = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + tokenize_res[index] + '<span class="msg_time">' + time + '</span></div></div>';
+										$("#tokenFormeight").append($.parseHTML(tokenHTML));
+									}
+									$.ajax({
+										data: {
+											token_list: JSON.stringify(tokenize_res),
+										},
+										type: "POST",
+										url: "/stem",
+										crossDomain: true,
+										success: function (data) {
+											stemmed_res = data;
+											$("#stemFormeight").empty();
+											for (let index = 0; index < stemmed_res.length; index++) {
+												var stemHTML = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + stemmed_res[index] + '<span class="msg_time">' + time + '</span></div></div>';
+												$("#stemFormeight").append($.parseHTML(stemHTML));
+											}
+											$.ajax({
+												data: {
+													stem_list: JSON.stringify(stemmed_res),
+												},
+												type: "POST",
+												url: "/stopword-removal",
+												crossDomain: true,
+												success: function (data) {
+													removed_stopword = data;
+													$("#stopwordFormeight").empty();
+													for (let index = 0; index < removed_stopword.length; index++) {
+														var stopwordHTML = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + stemmed_res[index] + '<span class="msg_time">' + time + '</span></div></div>';
+														$("#stopwordFormeight").append($.parseHTML(stopwordHTML));
+													}
+													$.ajax({
+														data: {
+															filtered_list: JSON.stringify(removed_stopword),
+														},
+														type: "POST",
+														url: "/pos-tagging",
+														crossDomain: true,
+														success: function (data) {
+															pos_tag = data;
+															$("#postagFormeight").empty();
+															for (let index = 0; index < removed_stopword.length; index++) {
+																var postagHTML = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + pos_tag[index] + '<span class="msg_time">' + time + '</span></div></div>';
+																$("#postagFormeight").append($.parseHTML(postagHTML));
+															}
+															$.ajax({
+																data: {
+																	clean_list: JSON.stringify(removed_stopword),
+																},
+																type: "POST",
+																url: "/parser",
+																crossDomain: true,
+																success: function (data) {
+																	top_down = data;
+																	// $("#topdownFormeight").empty();
+																	// for (let index = 0; index < removed_stopword.length; index++) {
+																	// 	var topdownHTML = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + top_down[index] + '<span class="msg_time">' + time + '</span></div></div>';
+																	// 	$("#topdownFormeight").append($.parseHTML(topdownHTML));
+																	// }
+																	$.ajax({
+																		data: {
+																			sentence: user_input,
+																		},
+																		type: "POST",
+																		url: "/themerole",
+																		crossDomain: true,
+																		success: function (data) {
+																			theme_role = data;
+																			$("#themeroleFormeight").empty();
+																			for (let index = 0; index < theme_role.length; index++) {
+																				var themeroleHTML = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + theme_role[index] + '<span class="msg_time">' + time + '</span></div></div>';
+																				$("#themeroleFormeight").append($.parseHTML(themeroleHTML));
+																			}
+																			$.ajax({
+																				data: {
+																					sentence: user_input,
+																				},
+																				type: "POST",
+																				url: "/logical",
+																				crossDomain: true,
+																				success: function (data) {
+																					logical_form = data;
+																					$("#logicalFormeight").empty();
+																						var logicalHTML = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + logical_form + '<span class="msg_time">' + time + '</span></div></div>';
+																						$("#logicalFormeight").append($.parseHTML(logicalHTML));
+																				}
+																			});
+																		}
+																	});
+																}
+															});
+														}
+													});
+												}
+											});
+										}
+									});
+								}
+							});
+						}
+					})
+				).then(function () {
+					var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + bot_reply + '<span class="msg_time">' + time + '</span></div></div>';
 					$("#messageFormeight").append($.parseHTML(botHtml));
 				});
 				event.preventDefault();
